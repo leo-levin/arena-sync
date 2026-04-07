@@ -104,25 +104,23 @@ def fetch_new_blocks(
         items = data.get("data", [])
         stop = False
         for item in items:
-            # Skip channels embedded in channel contents
-            if item.get("type") == "Channel":
-                continue
             connection = item.get("connection", {})
             connected_at = connection.get("connected_at")
             if not connected_at:
                 continue
-            block_id = str(item["id"])
+            item_id = str(item["id"])
+            item_type = "Channel" if item.get("type") == "Channel" else "Block"
 
             if checkpoint_ts is None:
                 # First run — collect to establish checkpoint, don't mirror
-                candidates.append({"id": block_id, "connected_at": connected_at})
+                candidates.append({"id": item_id, "connected_at": connected_at, "type": item_type})
                 continue
 
             if connected_at > checkpoint_ts:
-                candidates.append({"id": block_id, "connected_at": connected_at})
+                candidates.append({"id": item_id, "connected_at": connected_at, "type": item_type})
             elif connected_at == checkpoint_ts:
-                if block_id not in seen_ids_at_ts:
-                    candidates.append({"id": block_id, "connected_at": connected_at})
+                if item_id not in seen_ids_at_ts:
+                    candidates.append({"id": item_id, "connected_at": connected_at, "type": item_type})
             else:
                 stop = True
                 break
@@ -133,23 +131,24 @@ def fetch_new_blocks(
     return candidates
 
 
-def mirror_block(
+def mirror_item(
     client: ArenaClient,
-    block_id: str,
+    item_id: str,
+    item_type: str,
     all_channel_id: int,
     dry_run: bool,
 ) -> bool:
     if dry_run:
-        log.info("[DRY RUN] Would mirror block %s → channel %s", block_id, all_channel_id)
+        log.info("[DRY RUN] Would mirror %s %s → channel %s", item_type, item_id, all_channel_id)
         return True
     try:
         client.post(
             "/connections",
-            {"connectable_id": int(block_id), "connectable_type": "Block", "channel_ids": [all_channel_id]},
+            {"connectable_id": int(item_id), "connectable_type": item_type, "channel_ids": [all_channel_id]},
         )
         return True
     except requests.HTTPError as e:
-        log.error("Failed to mirror block %s: %s", block_id, e)
+        log.error("Failed to mirror %s %s: %s", item_type, item_id, e)
         return False
 
 
@@ -222,30 +221,30 @@ def run_sync(config: dict, state: dict, state_path: str):
         channel_mirrored = 0
         channel_dupes = 0
 
-        for block in candidates:
-            block_id = block["id"]
-            connected_at = block["connected_at"]
+        for item in candidates:
+            item_id = item["id"]
+            item_type = item.get("type", "Block")
+            connected_at = item["connected_at"]
 
-            if block_id in mirrored:
+            if item_id in mirrored:
                 channel_dupes += 1
                 total_dupes += 1
-                # Still advance checkpoint
             else:
-                success = mirror_block(client, block_id, all_channel_id, dry_run)
+                success = mirror_item(client, item_id, item_type, all_channel_id, dry_run)
                 if not success:
-                    log.warning("Stopping channel %s after write failure on block %s.", ch_slug, block_id)
+                    log.warning("Stopping channel %s after write failure on %s %s.", ch_slug, item_type, item_id)
                     break
-                mirrored.add(block_id)
+                mirrored.add(item_id)
                 channel_mirrored += 1
                 total_mirrored += 1
-                log.info("Mirrored block %s from channel %s.", block_id, ch_slug)
+                log.info("Mirrored %s %s from channel %s.", item_type, item_id, ch_slug)
 
             # Advance checkpoint candidate
             if connected_at > new_checkpoint_ts:
                 new_checkpoint_ts = connected_at
-                new_checkpoint_ids = {block_id}
+                new_checkpoint_ids = {item_id}
             elif connected_at == new_checkpoint_ts:
-                new_checkpoint_ids.add(block_id)
+                new_checkpoint_ids.add(item_id)
 
         state["channels"][str(ch_id)] = {
             "last_seen_connected_at": new_checkpoint_ts,
