@@ -51,8 +51,12 @@ def load_state(path: str) -> dict:
     p = Path(path)
     if p.exists() and p.stat().st_size > 0:
         with open(p) as f:
-            return json.load(f)
-    return {"channels": {}, "mirrored_block_ids": []}
+            data = json.load(f)
+    else:
+        data = {}
+    data.setdefault("channels", {})
+    data.setdefault("mirrored_block_ids", [])
+    return data
 
 
 def save_state(state: dict, path: str):
