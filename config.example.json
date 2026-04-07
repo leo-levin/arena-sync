@@ -1,0 +1,8 @@
+{
+  "group_id": "my-group-slug",
+  "all_channel_id": 12345,
+  "excluded_channel_ids": [],
+  "poll_recent_pages_per_channel": 2,
+  "group_discovery_pages": 5,
+  "dry_run": false
+}
