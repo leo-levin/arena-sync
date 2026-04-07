@@ -36,15 +36,18 @@ jobs:
 
       - name: Commit state to state branch
         run: |
-          git config user.name "arena-sync-bot"
-          git config user.email "bot@arena-sync"
-          if git diff --quiet state.json 2>/dev/null && git diff --cached --quiet state.json 2>/dev/null; then
-            echo "No state changes."
+          if [ ! -s state.json ] || [ "$(cat state.json)" = "{}" ]; then
+            echo "No meaningful state to save."
             exit 0
           fi
-          git stash -- state.json
-          git checkout -B state origin/state 2>/dev/null || git checkout -B state
-          git stash pop
+          cp state.json /tmp/state.json
+          git config user.name "arena-sync-bot"
+          git config user.email "bot@arena-sync"
+          git fetch origin state 2>/dev/null || true
+          git checkout -B state origin/state 2>/dev/null || git checkout --orphan state
+          git rm -rf . 2>/dev/null || true
+          cp /tmp/state.json state.json
           git add state.json
+          git diff --cached --quiet && echo "State unchanged." && exit 0
           git commit -m "state: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push origin state
