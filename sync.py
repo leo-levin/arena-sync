@@ -146,13 +146,17 @@ def mirror_item(
             "/connections",
             {"connectable_id": int(item_id), "connectable_type": item_type, "channel_ids": [all_channel_id]},
         )
+        time.sleep(1.0)
         return True
     except requests.HTTPError as e:
+        if e.response is not None and e.response.status_code in (400, 422):
+            log.warning("Skipping %s %s (API rejected: %s)", item_type, item_id, e.response.status_code)
+            return True  # treat as handled, don't stop processing
         log.error("Failed to mirror %s %s: %s", item_type, item_id, e)
         return False
 
 
-def run_sync(config: dict, state: dict, state_path: str):
+def run_sync(config: dict, state: dict, state_path: str, backfill: bool = False):
     token = os.environ.get("ARENA_TOKEN")
     if not token:
         raise RuntimeError("ARENA_TOKEN environment variable not set.")
@@ -161,7 +165,7 @@ def run_sync(config: dict, state: dict, state_path: str):
     group_id = config["group_id"]
     all_channel_id = config["all_channel_id"]
     excluded_ids = set(str(x) for x in config.get("excluded_channel_ids", []))
-    max_pages = config.get("poll_recent_pages_per_channel", 2)
+    max_pages = 100 if backfill else config.get("poll_recent_pages_per_channel", 2)
     discovery_pages = config.get("group_discovery_pages", 5)
     dry_run = config.get("dry_run", False)
 
@@ -196,7 +200,7 @@ def run_sync(config: dict, state: dict, state_path: str):
             log.error("Error fetching channel %s (%s): %s", ch_slug, ch_id, e)
             continue
 
-        if is_first_run:
+        if is_first_run and not backfill:
             # Establish checkpoint, mirror nothing
             if candidates:
                 newest_ts = candidates[0]["connected_at"]
@@ -216,8 +220,8 @@ def run_sync(config: dict, state: dict, state_path: str):
             continue
 
         total_candidates += len(candidates)
-        new_checkpoint_ts = checkpoint["last_seen_connected_at"]
-        new_checkpoint_ids = set(checkpoint.get("last_seen_ids_at_timestamp", []))
+        new_checkpoint_ts = checkpoint["last_seen_connected_at"] if checkpoint else ""
+        new_checkpoint_ids = set(checkpoint.get("last_seen_ids_at_timestamp", [])) if checkpoint else set()
         channel_mirrored = 0
         channel_dupes = 0
 
@@ -268,13 +272,14 @@ def main():
     parser = argparse.ArgumentParser(description="Are.na group-to-ALL sync")
     parser.add_argument("--config", default="config.json", help="Path to config JSON")
     parser.add_argument("--state", default="state.json", help="Path to state JSON")
+    parser.add_argument("--backfill", action="store_true", help="Mirror all existing blocks, not just new ones")
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = json.load(f)
 
     state = load_state(args.state)
-    run_sync(config, state, args.state)
+    run_sync(config, state, args.state, backfill=args.backfill)
 
 
 if __name__ == "__main__":
