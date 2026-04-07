@@ -1,0 +1,118 @@
+{
+  "channels": {
+    "5014212": {
+      "last_seen_connected_at": "2026-04-06T23:12:36Z",
+      "last_seen_ids_at_timestamp": [
+        "989598"
+      ]
+    },
+    "5013228": {
+      "last_seen_connected_at": "2026-04-07T21:17:27Z",
+      "last_seen_ids_at_timestamp": [
+        "2594794"
+      ]
+    },
+    "4913003": {
+      "last_seen_connected_at": "2026-04-07T18:33:34Z",
+      "last_seen_ids_at_timestamp": [
+        "27888536"
+      ]
+    },
+    "3411244": {
+      "last_seen_connected_at": "2024-12-19T14:15:00Z",
+      "last_seen_ids_at_timestamp": [
+        "33096360"
+      ]
+    },
+    "3257547": {
+      "last_seen_connected_at": "2026-03-16T07:03:38Z",
+      "last_seen_ids_at_timestamp": [
+        "35297863"
+      ]
+    },
+    "2842094": {
+      "last_seen_connected_at": "2024-05-23T09:52:34Z",
+      "last_seen_ids_at_timestamp": [
+        "5333470"
+      ]
+    },
+    "2842090": {
+      "last_seen_connected_at": "2026-04-07T21:22:32Z",
+      "last_seen_ids_at_timestamp": []
+    },
+    "2842087": {
+      "last_seen_connected_at": "2024-04-30T16:23:58Z",
+      "last_seen_ids_at_timestamp": [
+        "27854198",
+        "27854199",
+        "27854190",
+        "27854200",
+        "27854193",
+        "27854196",
+        "27854197",
+        "27854202"
+      ]
+    },
+    "2549900": {
+      "last_seen_connected_at": "2023-12-13T20:25:51Z",
+      "last_seen_ids_at_timestamp": [
+        "9761513"
+      ]
+    },
+    "2537644": {
+      "last_seen_connected_at": "2024-08-20T08:51:27Z",
+      "last_seen_ids_at_timestamp": [
+        "17328010"
+      ]
+    },
+    "2524947": {
+      "last_seen_connected_at": "2023-11-29T22:53:58Z",
+      "last_seen_ids_at_timestamp": [
+        "9231889"
+      ]
+    },
+    "2523935": {
+      "last_seen_connected_at": "2023-11-29T23:53:34Z",
+      "last_seen_ids_at_timestamp": [
+        "14328510"
+      ]
+    },
+    "2512835": {
+      "last_seen_connected_at": "2023-12-07T19:03:53Z",
+      "last_seen_ids_at_timestamp": [
+        "25117897"
+      ]
+    },
+    "2512825": {
+      "last_seen_connected_at": "2026-02-24T22:14:08Z",
+      "last_seen_ids_at_timestamp": [
+        "33085519"
+      ]
+    },
+    "2503883": {
+      "last_seen_connected_at": "2023-11-29T13:36:33Z",
+      "last_seen_ids_at_timestamp": [
+        "18347668"
+      ]
+    },
+    "2496840": {
+      "last_seen_connected_at": "2023-12-09T19:28:39Z",
+      "last_seen_ids_at_timestamp": [
+        "19987223"
+      ]
+    },
+    "2496836": {
+      "last_seen_connected_at": "2024-01-19T17:03:02Z",
+      "last_seen_ids_at_timestamp": [
+        "10950321"
+      ]
+    },
+    "1848938": {
+      "last_seen_connected_at": "2023-11-18T00:46:51Z",
+      "last_seen_ids_at_timestamp": [
+        "5336137"
+      ]
+    }
+  },
+  "mirrored_block_ids": []
+}
